@@ -152,9 +152,9 @@ project "vrm"
     language "C++"
     targetdir "bin/%{cfg.buildcfg}/plugins"
     defines { "TM_LINKS_IG_VRM" }
-    files {"vrm_loader/**.inl", "vrm_loader/**.h", "vrm_loader/**.c"}
+    files {"plugins/loader/**.inl", "plugins/loader/**.h", "plugins/loader/**.c"}
     sysincludedirs { "" }
     filter "platforms:Win64"
     targetdir "$(TM_SDK_DIR)/bin/plugins"
     links { }
-    includedirs { "vrm_loader/include" }
+    includedirs { "plugins/loader/include" }
