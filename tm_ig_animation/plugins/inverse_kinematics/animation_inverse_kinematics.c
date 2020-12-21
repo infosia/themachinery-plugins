@@ -14,6 +14,8 @@
 #include <foundation/the_truth_types.h>
 #include <foundation/log.h>
 
+#include "ik/ik.h"
+
 static struct tm_entity_api *tm_entity_api;
 static struct tm_temp_allocator_api *tm_temp_allocator_api;
 static struct tm_the_truth_api *tm_the_truth_api;
@@ -24,6 +26,8 @@ static struct tm_scene_tree_component_api *tm_scene_tree_component_api;
 static struct tm_tag_component_api *tm_tag_component_api;
 static struct tm_tag_component_manager_o *tm_tag_component_manager;
 static struct tm_link_component_api *tm_link_component_api;
+
+static uint32_t ik_retain_count = 0;
 
 typedef struct tm_animation_ik_component_t
 {
@@ -114,9 +118,30 @@ static bool component__load_asset(tm_component_manager_o *manager_, tm_entity_t 
     return true;
 }
 
+static void components_created(tm_component_manager_o* manager)
+{
+    if (ik_retain_count == 0) {
+        ik.init();
+    }
+    ik_retain_count++;
+
+    struct ik_solver_t* solver = ik.solver.create(IK_FABRIK);
+    solver->max_iterations = 20;
+    solver->tolerance = 1e-3f;
+    solver->flags |= IK_ENABLE_CONSTRAINTS;
+    struct ik_node_t* tree = solver->node->create(0);
+    struct ik_node_t* node = solver->node->create(1);
+    solver->node->add_child(tree, node);
+}
+
 static void destroy(tm_component_manager_o *manager)
 {
     tm_animation_ik_component_manager_t *man = (tm_animation_ik_component_manager_t *)manager;
+
+    ik_retain_count--;
+    if (ik_retain_count == 0) {
+        ik.deinit();
+    }
 
     tm_entity_context_o *ctx = man->ctx;
     tm_allocator_i a = man->allocator;
@@ -138,6 +163,7 @@ static void component__create(struct tm_entity_context_o *ctx)
         .name = TM_TT_TYPE__IG_ANIMATION_IK,
         .bytes = sizeof(tm_animation_ik_component_t),
         .load_asset = component__load_asset,
+        .components_created = components_created,
         .destroy = destroy,
         .manager = (tm_component_manager_o *)manager
     };
@@ -156,6 +182,30 @@ static void engine_update__bind(tm_engine_o *inst, tm_engine_update_set_t *data)
         if (bb->id == TM_ENTITY_BB__DELTA_TIME)
             dt = (float)bb->double_value;
     }
+
+    struct ik_solver_t* solver = ik.solver.create(IK_TWO_BONE);
+    solver->max_iterations = 20;
+    solver->tolerance = 1e-3f;
+    solver->flags |= IK_ENABLE_CONSTRAINTS;
+    struct ik_node_t* base = solver->node->create(0);
+    struct ik_node_t* mid = solver->node->create_child(base, 1);
+    struct ik_node_t* tip = solver->node->create_child(mid, 2);
+
+    base->position = ik.vec3.vec3(0, 0, 0);
+    mid->position = ik.vec3.vec3(0, 2, 0);
+    tip->position = ik.vec3.vec3(0, 2, 0);
+
+    struct ik_effector_t* effector = solver->effector->create();
+    solver->effector->attach(effector, tip);
+
+    effector->chain_length = 2;
+    effector->target_position = ik.vec3.vec3(2, 0, 0);
+    effector->flags |= IK_WEIGHT_NLERP;
+    ik.solver.update_distances(solver);
+
+    ik.solver.solve(solver);
+
+    tip->position = ik.vec3.vec3(0, 2, 0);
 }
 
 static bool engine_filter__bind(tm_engine_o *inst, const uint32_t *components, uint32_t num_components, const tm_component_mask_t *mask)
