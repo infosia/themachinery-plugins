@@ -162,15 +162,6 @@ project "puppet"
     filter "platforms:Win64"
     includedirs { "plugins/puppet/include", "plugins/common" }
 
-project "simbody"
-    location "build/simbody"
-    kind "StaticLib"
-    language "C++"
-    files {"plugins/simbody/**.inl", "plugins/simbody/**.hpp", "plugins/simbody/**.cpp"}
-    filter "platforms:Win64"
-    links { "simbody/lib/SimTKsimbody_static_d.lib" }
-    includedirs { "plugins/common", "simbody/include" }
-
 project "inverse_kinematics"
     location "build/inverse_kinematics"
     kind "StaticLib"
@@ -178,7 +169,6 @@ project "inverse_kinematics"
     files {"plugins/inverse_kinematics/**.inl", "plugins/inverse_kinematics/**.h", "plugins/inverse_kinematics/**.c"}
     filter "platforms:Win64"
     includedirs { "plugins/common", "plugins/common/kazmath" }
-    links { "simbody" }
 
 project "host"
     location "build/host"
