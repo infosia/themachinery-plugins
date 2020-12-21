@@ -152,7 +152,7 @@ project "common"
     language "C++"
     files {"plugins/common/**.inl", "plugins/common/**.h", "plugins/common/**.c"}
     filter "platforms:Win64"
-    includedirs { }
+    includedirs { "plugins/common/include", "plugins/kazmath", "plugins/common/ik/include/private", "plugins/common/ik/include/public", "plugins/common/ik/include/vtables", "plugins/common/ik/generated/include/private", "plugins/common/ik/generated/include/public" }
 
 project "puppet"
     location "build/puppet"
@@ -160,7 +160,7 @@ project "puppet"
     language "C++"
     files {"plugins/puppet/**.inl", "plugins/puppet/**.h", "plugins/puppet/**.c"}
     filter "platforms:Win64"
-    includedirs { "plugins/puppet/include", "plugins/common" }
+    includedirs { "plugins/puppet/include" }
 
 project "inverse_kinematics"
     location "build/inverse_kinematics"
@@ -168,7 +168,7 @@ project "inverse_kinematics"
     language "C++"
     files {"plugins/inverse_kinematics/**.inl", "plugins/inverse_kinematics/**.h", "plugins/inverse_kinematics/**.c"}
     filter "platforms:Win64"
-    includedirs { "plugins/common", "plugins/common/kazmath" }
+    includedirs { "plugins/inverse_kinematics/include" }
 
 project "host"
     location "build/host"
