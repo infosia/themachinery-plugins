@@ -77,6 +77,7 @@ filter "platforms:Win64"
         "4214", -- Bool bit-fields. Valid C99.
         "4221", -- Pointers to locals in initializers. Valid C99.
         "4702", -- Unreachable code. We sometimes want return after exit() because otherwise we get an error about no return value.
+        "4706", -- Assignment within conditional expression
     }
     linkoptions {"/ignore:4099"}
 
@@ -145,16 +146,39 @@ filter "configurations:Release"
     defines { "TM_CONFIGURATION_RELEASE" }
     optimize "On"
 
+project "common"
+    location "build/common"
+    kind "StaticLib"
+    language "C++"
+    files {"plugins/common/**.inl", "plugins/common/**.h", "plugins/common/**.c"}
+    filter "platforms:Win64"
+    includedirs { "plugins/common/include", "plugins/kazmath", "plugins/common/ik/include/private", "plugins/common/ik/include/public", "plugins/common/ik/include/vtables", "plugins/common/ik/generated/include/private", "plugins/common/ik/generated/include/public" }
+
 project "puppet"
     location "build/puppet"
-    kind "SharedLib"
-    targetname "tm_ig_animation_puppet"
+    kind "StaticLib"
     language "C++"
-    targetdir "bin/%{cfg.buildcfg}/plugins"
-    defines { "TM_LINKS_ANIMATION_BIND" }
     files {"plugins/puppet/**.inl", "plugins/puppet/**.h", "plugins/puppet/**.c"}
-    sysincludedirs { "" }
+    filter "platforms:Win64"
+    includedirs { "plugins/puppet/include" }
+
+project "inverse_kinematics"
+    location "build/inverse_kinematics"
+    kind "StaticLib"
+    language "C++"
+    files {"plugins/inverse_kinematics/**.inl", "plugins/inverse_kinematics/**.h", "plugins/inverse_kinematics/**.c"}
+    filter "platforms:Win64"
+    includedirs { "plugins/inverse_kinematics/include" }
+
+project "host"
+    location "build/host"
+    kind "SharedLib"
+    targetname "tm_ig_animation"
+    language "C++"
+    dependson { "puppet", "inverse_kinematics" }
+    targetdir "bin/%{cfg.buildcfg}/plugins"
+    defines { "TM_LINKS_ANIMATION_PUPPET", "TM_LINKS_ANIMATION_PREVIEW" }
+    files { "plugins/tm_ig_animation.c" }
     filter "platforms:Win64"
     targetdir "$(TM_SDK_DIR)/bin/plugins"
-    links { }
-    includedirs { "plugins/puppet/include" }
+    links { "common", "puppet", "inverse_kinematics" }

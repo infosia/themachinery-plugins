@@ -263,7 +263,7 @@ static void component__register_engine(struct tm_entity_context_o *ctx)
     tm_entity_api->register_engine(ctx, &animation_puppet_engine);
 }
 
-TM_DLL_EXPORT void tm_load_plugin(struct tm_api_registry_api *reg, bool load)
+void tm_ig_animation_puppet_load_plugin(struct tm_api_registry_api *reg, bool load)
 {
     tm_entity_api = reg->get(TM_ENTITY_API_NAME);
     tm_the_truth_api = reg->get(TM_THE_TRUTH_API_NAME);
