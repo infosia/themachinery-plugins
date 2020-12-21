@@ -160,7 +160,7 @@ project "puppet"
     language "C++"
     files {"plugins/puppet/**.inl", "plugins/puppet/**.h", "plugins/puppet/**.c"}
     filter "platforms:Win64"
-    includedirs { "plugins/puppet/include" }
+    includedirs { "plugins/puppet/include", "plugins/common" }
 
 project "inverse_kinematics"
     location "build/inverse_kinematics"
@@ -168,7 +168,7 @@ project "inverse_kinematics"
     language "C++"
     files {"plugins/inverse_kinematics/**.inl", "plugins/inverse_kinematics/**.h", "plugins/inverse_kinematics/**.c"}
     filter "platforms:Win64"
-    includedirs { "plugins/inverse_kinematics/include" }
+    includedirs { "plugins/inverse_kinematics/include", "plugins/common" }
 
 project "host"
     location "build/host"

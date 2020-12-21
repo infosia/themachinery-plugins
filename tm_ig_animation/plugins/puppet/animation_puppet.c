@@ -21,16 +21,16 @@
 #include "mapping/bones-1.h"
 #include "mapping/bones-2.h"
 
-struct tm_entity_api *tm_entity_api;
-struct tm_temp_allocator_api *tm_temp_allocator_api;
-struct tm_the_truth_api *tm_the_truth_api;
-struct tm_the_truth_common_types_api *tm_the_truth_common_types_api;
-struct tm_localizer_api *tm_localizer_api;
-struct tm_logger_api *tm_logger_api;
-struct tm_scene_tree_component_api *tm_scene_tree_component_api;
-struct tm_tag_component_api *tm_tag_component_api;
-struct tm_tag_component_manager_o *tm_tag_component_manager;
-struct tm_link_component_api *tm_link_component_api;
+static struct tm_entity_api *tm_entity_api;
+static struct tm_temp_allocator_api *tm_temp_allocator_api;
+static struct tm_the_truth_api *tm_the_truth_api;
+static struct tm_the_truth_common_types_api *tm_the_truth_common_types_api;
+static struct tm_localizer_api *tm_localizer_api;
+static struct tm_logger_api *tm_logger_api;
+static struct tm_scene_tree_component_api *tm_scene_tree_component_api;
+static struct tm_tag_component_api *tm_tag_component_api;
+static struct tm_tag_component_manager_o *tm_tag_component_manager;
+static  struct tm_link_component_api *tm_link_component_api;
 
 #define NODE_NOT_FOUND UINT32_MAX
 #define ANIMATION_ROOT_TAG_HASH TM_STATIC_HASH("tm_ig_animation_puppet_root",   0xc88a0edba8d16200ULL)
@@ -63,35 +63,7 @@ static tm_ci_editor_ui_i *editor_aspect = &(tm_ci_editor_ui_i){
     .category = component__category
 };
 
-static void set_vec3(tm_the_truth_o *tt, tm_the_truth_object_o *o, tm_vec3_t* a)
-{
-    tm_the_truth_api->set_float(tt, o, TM_TT_PROP__VEC3__X, a->x);
-    tm_the_truth_api->set_float(tt, o, TM_TT_PROP__VEC3__Y, a->y);
-    tm_the_truth_api->set_float(tt, o, TM_TT_PROP__VEC3__Z, a->z);
-}
-
-static void set_vec4(tm_the_truth_o *tt, tm_the_truth_object_o *o, tm_vec4_t *a)
-{
-    tm_the_truth_api->set_float(tt, o, TM_TT_PROP__VEC4__X, a->x);
-    tm_the_truth_api->set_float(tt, o, TM_TT_PROP__VEC4__Y, a->y);
-    tm_the_truth_api->set_float(tt, o, TM_TT_PROP__VEC4__Z, a->z);
-    tm_the_truth_api->set_float(tt, o, TM_TT_PROP__VEC4__W, a->w);
-}
-
-static void read_vec3(const tm_the_truth_o *tt, const tm_the_truth_object_o *o, tm_vec3_t *a)
-{
-    a->x = tm_the_truth_api->get_float(tt, o, TM_TT_PROP__VEC3__X);
-    a->y = tm_the_truth_api->get_float(tt, o, TM_TT_PROP__VEC3__Y);
-    a->z = tm_the_truth_api->get_float(tt, o, TM_TT_PROP__VEC3__Z);
-}
-
-static void read_vec4(const tm_the_truth_o *tt, const tm_the_truth_object_o *o, tm_vec4_t *a)
-{
-    a->x = tm_the_truth_api->get_float(tt, o, TM_TT_PROP__VEC4__X);
-    a->y = tm_the_truth_api->get_float(tt, o, TM_TT_PROP__VEC4__Y);
-    a->z = tm_the_truth_api->get_float(tt, o, TM_TT_PROP__VEC4__Z);
-    a->w = tm_the_truth_api->get_float(tt, o, TM_TT_PROP__VEC4__W);
-}
+#include "tm_ig_truth_common.inl"
 
 static void component__create_types(struct tm_the_truth_o *tt)
 {
