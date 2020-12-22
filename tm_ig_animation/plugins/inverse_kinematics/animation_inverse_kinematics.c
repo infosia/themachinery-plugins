@@ -14,7 +14,7 @@
 #include <plugins/the_machinery_shared/component_interfaces/editor_ui_interface.h>
 #include <plugins/entity/tag_component.h>
 
-#include "simbody_component.h"
+#include "simbody_component.hpp"
 
 static struct tm_entity_api *tm_entity_api;
 static struct tm_temp_allocator_api *tm_temp_allocator_api;
