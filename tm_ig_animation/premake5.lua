@@ -78,6 +78,8 @@ filter "platforms:Win64"
         "4221", -- Pointers to locals in initializers. Valid C99.
         "4702", -- Unreachable code. We sometimes want return after exit() because otherwise we get an error about no return value.
         "4706", -- Assignment within conditional expression
+        "4458", -- declaration of local variable hides class member
+        "4459", -- declaration of local variable hides global declaration
     }
     linkoptions {"/ignore:4099"}
 
@@ -177,7 +179,7 @@ project "inverse_kinematics"
     language "C++"
     files {"plugins/inverse_kinematics/**.inl", "plugins/inverse_kinematics/**.h", "plugins/inverse_kinematics/**.c"}
     filter "platforms:Win64"
-    includedirs { "plugins/common", "plugins/common/kazmath" }
+    includedirs { "plugins/common", "plugins/simbody" }
     links { "simbody" }
 
 project "host"

@@ -14,6 +14,8 @@
 #include <plugins/the_machinery_shared/component_interfaces/editor_ui_interface.h>
 #include <plugins/entity/tag_component.h>
 
+#include "simbody_component.h"
+
 static struct tm_entity_api *tm_entity_api;
 static struct tm_temp_allocator_api *tm_temp_allocator_api;
 static struct tm_the_truth_api *tm_the_truth_api;
@@ -119,6 +121,8 @@ static void destroy(tm_component_manager_o *manager)
 {
     tm_animation_ik_component_manager_t *man = (tm_animation_ik_component_manager_t *)manager;
 
+    simbody_component_destroy();
+
     tm_entity_context_o *ctx = man->ctx;
     tm_allocator_i a = man->allocator;
     tm_free(&a, man, sizeof(*man));
@@ -144,6 +148,8 @@ static void component__create(struct tm_entity_context_o *ctx)
     };
 
     tm_entity_api->register_component(ctx, &component);
+
+    simbody_component_init();
 }
 
 static void engine_update__bind(tm_engine_o *inst, tm_engine_update_set_t *data)
