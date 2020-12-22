@@ -152,7 +152,10 @@ project "common"
     language "C++"
     files {"plugins/common/**.inl", "plugins/common/**.h", "plugins/common/**.c"}
     filter "platforms:Win64"
-    includedirs { "plugins/common", "plugins/kazmath", "plugins/common/ik/include/private", "plugins/common/ik/include/public", "plugins/common/ik/include/vtables", "plugins/common/ik/generated/include/private", "plugins/common/ik/generated/include/public" }
+    includedirs { "plugins/common", "plugins/kazmath", "plugins/common/ik/include", "plugins/common/cstructures/include" }
+    disablewarnings {
+        "4013", "4311", "4312", "4389", "4244", "4189", "4701", "4703"
+    }
 
 project "puppet"
     location "build/puppet"
@@ -168,7 +171,7 @@ project "inverse_kinematics"
     language "C++"
     files {"plugins/inverse_kinematics/**.inl", "plugins/inverse_kinematics/**.h", "plugins/inverse_kinematics/**.c"}
     filter "platforms:Win64"
-    includedirs { "plugins/common", "plugins/kazmath", "plugins/common/ik/include/private", "plugins/common/ik/include/public", "plugins/common/ik/include/vtables", "plugins/common/ik/generated/include/private", "plugins/common/ik/generated/include/public" }
+    includedirs { "plugins/common", "plugins/kazmath", "plugins/common/ik/include", "plugins/common/cstructures/include" }
 
 project "host"
     location "build/host"
