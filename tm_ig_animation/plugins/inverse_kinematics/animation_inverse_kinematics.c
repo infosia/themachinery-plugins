@@ -171,6 +171,11 @@ static void component__create(struct tm_entity_context_o *ctx)
     tm_entity_api->register_component(ctx, &component);
 }
 
+static void apply_ik_nodes_to_scene(struct ik_node_t* node)
+{
+    TM_LOG("BINGO");
+}
+
 static void engine_update__bind(tm_engine_o *inst, tm_engine_update_set_t *data)
 {
     struct tm_entity_context_o *ctx = (struct tm_entity_context_o *)inst;
@@ -186,7 +191,7 @@ static void engine_update__bind(tm_engine_o *inst, tm_engine_update_set_t *data)
     struct ik_solver_t* solver = ik.solver.create(IK_TWO_BONE);
     solver->max_iterations = 20;
     solver->tolerance = 1e-3f;
-    solver->flags |= IK_ENABLE_CONSTRAINTS;
+    solver->flags |= IK_ENABLE_CONSTRAINTS | IK_ENABLE_TARGET_ROTATIONS;
     struct ik_node_t* base = solver->node->create(0);
     struct ik_node_t* mid = solver->node->create_child(base, 1);
     struct ik_node_t* tip = solver->node->create_child(mid, 2);
@@ -199,13 +204,14 @@ static void engine_update__bind(tm_engine_o *inst, tm_engine_update_set_t *data)
     solver->effector->attach(effector, tip);
 
     effector->chain_length = 2;
-    effector->target_position = ik.vec3.vec3(2, 0, 0);
+    effector->target_position = ik.vec3.vec3(4, 0, 0);
     effector->flags |= IK_WEIGHT_NLERP;
     ik.solver.update_distances(solver);
 
+    ik.solver.set_tree(solver, base);
+    ik.solver.rebuild(solver);
     ik.solver.solve(solver);
-
-    tip->position = ik.vec3.vec3(0, 2, 0);
+    ik.solver.iterate_affected_nodes(solver, apply_ik_nodes_to_scene);
 }
 
 static bool engine_filter__bind(tm_engine_o *inst, const uint32_t *components, uint32_t num_components, const tm_component_mask_t *mask)
