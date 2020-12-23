@@ -14,7 +14,7 @@
 #include <foundation/the_truth_types.h>
 #include <foundation/log.h>
 
-#include <ik/ik.h>
+#include "ik/ik.h"
 
 static struct tm_entity_api *tm_entity_api;
 static struct tm_temp_allocator_api *tm_temp_allocator_api;
@@ -121,9 +121,7 @@ static bool component__load_asset(tm_component_manager_o *manager_, tm_entity_t 
 static void components_created(tm_component_manager_o* manager)
 {
     if (ik_retain_count == 0) {
-        if (ik_init() != 0) {
-            TM_LOG("[ERROR] Failed to initialize IK");
-        }
+
     }
     ik_retain_count++;
 }
@@ -134,7 +132,7 @@ static void destroy(tm_component_manager_o *manager)
 
     ik_retain_count--;
     if (ik_retain_count == 0) {
-        ik_deinit();
+
     }
 
     tm_entity_context_o *ctx = man->ctx;
@@ -176,36 +174,6 @@ static void engine_update__bind(tm_engine_o *inst, tm_engine_update_set_t *data)
         if (bb->id == TM_ENTITY_BB__DELTA_TIME)
             dt = (float)bb->double_value;
     }
-
-    struct ik_node* base = ik_node_create();
-    IK_INCREF(base);
-    struct ik_node* mid = ik_node_create_child(base);
-    struct ik_node* tip = ik_node_create_child(mid);
-
-    struct ik_effector* e1 = ik_node_create_effector(tip);
-
-    struct ik_algorithm* a1 = ik_node_create_algorithm(base, IK_TWO_BONE);
-
-    struct ik_solver* s1 = ik_solver_build(base);
-    IK_INCREF(s1);
-
-    base->position = { 0, 0, 0 };
-    mid->position = ik_vec3(0, 2, 0);
-    tip->position = ik_vec3(0, 2, 0);
-
-    e1->target_position = ik_vec3(2, -2, 0);
-
-    ik_solver_update_translations(s1);
-
-    int converged = ik_solver_solve(s1);
-
-    print_pos("base: ", base->position);
-    print_pos("mid: ", mid->position);
-    print_pos("tip: ", tip->position);
-    print_pos("target: ", e1->target_position);
-
-    IK_DECREF(base);
-    IK_DECREF(s1);
 }
 
 static bool engine_filter__bind(tm_engine_o *inst, const uint32_t *components, uint32_t num_components, const tm_component_mask_t *mask)
