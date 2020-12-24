@@ -39,6 +39,19 @@ TM_RESTORE_PADDING_WARNINGS
 
 #include <float.h>
 
+//#define VRM_CONVERT_COORD
+
+#ifdef VRM_CONVERT_COORD
+static void vrm_vec3_convert_coord(cgltf_float* data, cgltf_size count)
+{
+	for (cgltf_size i = 0; i < count; i++) {
+        data[i] = -data[i];
+        data[i + 2] = -data[i + 2];
+        i += 2;
+	}
+}
+#endif
+
 extern const struct dcc_asset_type_info_t *dcc_asset_ti;
 
 typedef struct import_vrm_task_t
@@ -158,6 +171,7 @@ static inline uint32_t vrm_to_tm_primitive_type(uint32_t cgltf_primitive_type, s
 	return TM_TT_VALUE__DCC_ASSET_MESH__PRIMITIVE_TYPE__MIXED_OR_UNKNOWN;
 }
 
+#ifndef VRM_CONVERT_COORD
 // Rotate root node by 180 degrees around the y axis to convert from VRM's to cgltf's coordinate system
 static inline void vrm_normalize_axis(cgltf_node* node)
 {
@@ -169,6 +183,7 @@ static inline void vrm_normalize_axis(cgltf_node* node)
 	node->rotation[2] = res.z;
 	node->rotation[3] = res.w;
 }
+#endif
 
 static inline tm_vec3_t v3_min(tm_vec3_t a, float* b)
 {
@@ -466,7 +481,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				uint32_t *data_start = buffers->allocate(buffers->inst, ibuf_size, 0);
 				uint32_t *indices_data = data_start;
 				for (cgltf_size k = 0; k < primitive->indices->count; ++k) {
-					indices_data[k] = (uint32_t)cgltf_accessor_read_index(primitive->indices, k);
+                    indices_data[k] = (uint32_t)cgltf_accessor_read_index(primitive->indices, k);
 				}
 				const uint32_t ibuf_id = buffers->add(buffers->inst, data_start, ibuf_size, 0);
 
@@ -589,6 +604,12 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 							cgltf_m[m_start + 12], cgltf_m[m_start + 13], cgltf_m[m_start + 14] , cgltf_m[m_start + 15],
 						};
 						tm_math_api->mat44_to_translation_quaternion_scale(&p, &r, &s, &m);
+
+#ifdef VRM_CONVERT_COORD
+						p.z = -p.z;
+						r.x = -r.x;
+						r.z = -r.z;
+#endif
 
 						tm_tt_id_t pos_id = tm_the_truth_api->create_object_of_type(tt, dcc_asset_ti->position_type, TM_TT_NO_UNDO_SCOPE);
 						tm_the_truth_object_o *pos_w = tm_the_truth_api->write(tt, pos_id);
@@ -785,6 +806,9 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				const cgltf_size unpack_count = num_vertices * 3;
 				vertices_data = (cgltf_float *)vbuf_data;
 				cgltf_accessor_unpack_floats(acc_POSITION, vertices_data, unpack_count);
+#ifdef VRM_CONVERT_COORD
+                vrm_vec3_convert_coord(vertices_data, unpack_count);
+#endif
 
 				// calc bounds
 				tm_vec3_t bounds[2] = {
@@ -817,6 +841,9 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				const cgltf_size unpack_count = acc_NORMAL->count * 3;
 				cgltf_accessor_unpack_floats(acc_NORMAL, (cgltf_float *)vbuf_data, unpack_count);
 				normals_data = (cgltf_float *)vbuf_data;
+#ifdef VRM_CONVERT_COORD
+                vrm_vec3_convert_coord(normals_data, unpack_count);
+#endif
 				vbuf_data += unpack_count * sizeof(float);
 			}
 
@@ -873,8 +900,10 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 	for (cgltf_size i = 0; i < data->scenes_count; ++i) {
 		cgltf_scene *scene = &data->scenes[i];
 		if (scene->nodes_count == 1) {
-			cgltf_node *rootnode = scene->nodes[0];
+#ifndef VRM_CONVERT_COORD
+            cgltf_node* rootnode = scene->nodes[0];
 			vrm_normalize_axis(rootnode);
+#endif
 			import_node(tt, obj, scene_obj, NULL, scene->nodes[0], &node_by_name, error); // a single root
 		} else {
 			cgltf_node *fakeroot = &(cgltf_node){
@@ -884,7 +913,9 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				.has_rotation = true,
 				.rotation = {0, 0, 0, 1}
 			};
+#ifndef VRM_CONVERT_COORD
 			vrm_normalize_axis(fakeroot);
+#endif
 			for (cgltf_size j = 0; j < scene->nodes_count; j++) {
 				scene->nodes[j]->parent = fakeroot;
 			}
