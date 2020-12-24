@@ -45,9 +45,9 @@ TM_RESTORE_PADDING_WARNINGS
 static void vrm_vec3_convert_coord(cgltf_float* data, cgltf_size count)
 {
 	for (cgltf_size i = 0; i < count; i++) {
-        data[i] = -data[i];
-        data[i + 2] = -data[i + 2];
-        i += 2;
+		data[i] = -data[i];
+		data[i + 2] = -data[i + 2];
+		i += 2;
 	}
 }
 #endif
@@ -228,7 +228,7 @@ static void import_node(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 	}
 	if (node->has_rotation) {
 		vrm_to_tm_vec4(node->rotation, &r);
-    }
+	}
 	if (node->has_scale) {
 		vrm_to_tm_vec3(node->scale, &s);
 	}
@@ -485,7 +485,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				uint32_t *data_start = buffers->allocate(buffers->inst, ibuf_size, 0);
 				uint32_t *indices_data = data_start;
 				for (cgltf_size k = 0; k < primitive->indices->count; ++k) {
-                    indices_data[k] = (uint32_t)cgltf_accessor_read_index(primitive->indices, k);
+					indices_data[k] = (uint32_t)cgltf_accessor_read_index(primitive->indices, k);
 				}
 				const uint32_t ibuf_id = buffers->add(buffers->inst, data_start, ibuf_size, 0);
 
@@ -810,7 +810,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				vertices_data = (cgltf_float *)vbuf_data;
 				cgltf_accessor_unpack_floats(acc_POSITION, vertices_data, unpack_count);
 #ifdef VRM_CONVERT_COORD
-                vrm_vec3_convert_coord(vertices_data, unpack_count);
+				vrm_vec3_convert_coord(vertices_data, unpack_count);
 #endif
 
 				// calc bounds
@@ -845,7 +845,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				cgltf_accessor_unpack_floats(acc_NORMAL, (cgltf_float *)vbuf_data, unpack_count);
 				normals_data = (cgltf_float *)vbuf_data;
 #ifdef VRM_CONVERT_COORD
-                vrm_vec3_convert_coord(normals_data, unpack_count);
+				vrm_vec3_convert_coord(normals_data, unpack_count);
 #endif
 				vbuf_data += unpack_count * sizeof(float);
 			}
@@ -904,7 +904,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 		cgltf_scene *scene = &data->scenes[i];
 		if (scene->nodes_count == 1) {
 #ifndef VRM_CONVERT_COORD
-            cgltf_node* rootnode = scene->nodes[0];
+			cgltf_node* rootnode = scene->nodes[0];
 			vrm_normalize_axis(rootnode);
 #endif
 			import_node(tt, obj, scene_obj, NULL, scene->nodes[0], &node_by_name, error); // a single root
