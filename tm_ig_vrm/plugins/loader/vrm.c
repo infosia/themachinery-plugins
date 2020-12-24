@@ -222,12 +222,13 @@ static void import_node(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 	if (node->has_translation) {
 		vrm_to_tm_vec3(node->translation, &p);
 #ifdef VRM_CONVERT_COORD
+		p.x = -p.x;
 		p.z = -p.z;
 #endif
 	}
 	if (node->has_rotation) {
 		vrm_to_tm_vec4(node->rotation, &r);
-	}
+    }
 	if (node->has_scale) {
 		vrm_to_tm_vec3(node->scale, &s);
 	}
@@ -610,6 +611,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 
 
 #ifdef VRM_CONVERT_COORD
+						p.x = -p.x;
 						p.z = -p.z;
 #endif
 						tm_tt_id_t pos_id = tm_the_truth_api->create_object_of_type(tt, dcc_asset_ti->position_type, TM_TT_NO_UNDO_SCOPE);
