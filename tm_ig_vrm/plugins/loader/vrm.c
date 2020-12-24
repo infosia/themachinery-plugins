@@ -39,7 +39,7 @@ TM_RESTORE_PADDING_WARNINGS
 
 #include <float.h>
 
-//#define VRM_CONVERT_COORD
+#define VRM_CONVERT_COORD
 
 #ifdef VRM_CONVERT_COORD
 static void vrm_vec3_convert_coord(cgltf_float* data, cgltf_size count)
@@ -221,6 +221,9 @@ static void import_node(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 
 	if (node->has_translation) {
 		vrm_to_tm_vec3(node->translation, &p);
+#ifdef VRM_CONVERT_COORD
+		p.z = -p.z;
+#endif
 	}
 	if (node->has_rotation) {
 		vrm_to_tm_vec4(node->rotation, &r);
@@ -605,12 +608,10 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 						};
 						tm_math_api->mat44_to_translation_quaternion_scale(&p, &r, &s, &m);
 
+
 #ifdef VRM_CONVERT_COORD
 						p.z = -p.z;
-						r.x = -r.x;
-						r.z = -r.z;
 #endif
-
 						tm_tt_id_t pos_id = tm_the_truth_api->create_object_of_type(tt, dcc_asset_ti->position_type, TM_TT_NO_UNDO_SCOPE);
 						tm_the_truth_object_o *pos_w = tm_the_truth_api->write(tt, pos_id);
 						tm_set_float_array(tt, pos_w, TM_TT_PROP__DCC_ASSET_POSITION__X, &p.x, 3);
