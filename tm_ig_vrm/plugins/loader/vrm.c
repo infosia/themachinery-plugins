@@ -82,7 +82,7 @@ static cgltf_skin *vrm_get_skin_for_mesh(const cgltf_data *data, const cgltf_mes
 {
 	for (cgltf_size i = 0; i < data->nodes_count; ++i) {
 		const cgltf_node *node = &data->nodes[i];
-		if (node->skin != NULL && node->mesh != NULL && strcmp(node->mesh->name, mesh->name) == 0) {
+		if (node->skin != NULL && node->mesh != NULL && node->mesh->name != NULL && strcmp(node->mesh->name, mesh->name) == 0) {
 			return node->skin;
 		}
 	}
@@ -211,8 +211,10 @@ static void import_node(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 	const tm_tt_id_t id = tm_the_truth_api->create_object_of_type(tt, dcc_asset_ti->node_type, TM_TT_NO_UNDO_SCOPE);
 	tm_the_truth_object_o *tm_node = tm_the_truth_api->write(tt, id);
 
-	tm_the_truth_api->set_string(tt, tm_node, TM_TT_PROP__DCC_ASSET_NODE__NAME, node->name);
-	const uint64_t name_hash = tm_murmur_hash_string_inline(node->name);
+	const char *node_name = node->name == NULL ? "node.*" : node->name;
+
+	tm_the_truth_api->set_string(tt, tm_node, TM_TT_PROP__DCC_ASSET_NODE__NAME, node_name);
+	const uint64_t name_hash = tm_murmur_hash_string_inline(node_name);
 	tm_hash_add(node_by_name, name_hash, id);
 
 	tm_vec3_t p = { 0, 0, 0 };
@@ -549,11 +551,17 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 
 				const cgltf_size unpack_count = acc_JOINTS_0->count * 4;
 
-				// assuming it's stored as unsigned short. might want to support unsigned char as well
-				unsigned short *joints_data = NULL;
-				tm_carray_temp_resize(joints_data, unpack_count, ta);
-				cgltf_buffer_view *buffer_view = acc_JOINTS_0->buffer_view;
-				memcpy(joints_data, (uint8_t*)buffer_view->buffer->data + buffer_view->offset, buffer_view->size);
+				unsigned char*  joints_data_char = NULL;
+				unsigned short* joints_data_short = NULL;
+				if (acc_JOINTS_0->component_type == cgltf_component_type_r_8u) {
+                    tm_carray_temp_resize(joints_data_char, unpack_count, ta);
+                    cgltf_buffer_view* buffer_view = acc_JOINTS_0->buffer_view;
+                    memcpy(joints_data_char, (uint8_t*)buffer_view->buffer->data + buffer_view->offset, buffer_view->size);
+                } else {
+                    tm_carray_temp_resize(joints_data_short, unpack_count, ta);
+                    cgltf_buffer_view* buffer_view = acc_JOINTS_0->buffer_view;
+                    memcpy(joints_data_short, (uint8_t*)buffer_view->buffer->data + buffer_view->offset, buffer_view->size);                                
+				}
 
 				cgltf_float *weights_data = NULL;
 				tm_carray_temp_resize(weights_data, unpack_count, ta);
@@ -567,7 +575,8 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				for (uint32_t v = 0; v < num_vertices; ++v) {
 					const uint32_t v_begin = v * 4;
 					for (int8_t idx = 0; idx < 4; ++idx) {
-						joints_used[joints_data[v_begin+idx]] = true;
+						const uint16_t joints_data_idx = joints_data_char != NULL ? joints_data_char[v_begin+idx] : joints_data_short[v_begin+idx];
+						joints_used[joints_data_idx] = true;
 					}
 				}
 
@@ -644,7 +653,8 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				for (uint32_t v = 0; v < num_vertices; ++v) {
 					const uint32_t v_begin = v * 4;
 					for (uint8_t idx = 0; idx < 4; idx++) {
-						tm_carray_temp_push(skin_data[v], ((tm_bone_weight_t){.bone_idx = joints_index[joints_data[v_begin + idx]], .weight = weights_data[v_begin + idx] }), ta);
+						const uint16_t joints_data_idx = joints_data_char != NULL ? joints_data_char[v_begin + idx] : joints_data_short[v_begin + idx];
+						tm_carray_temp_push(skin_data[v], ((tm_bone_weight_t){.bone_idx = joints_index[joints_data_idx], .weight = weights_data[v_begin + idx] }), ta);
 					}
 				}
 
