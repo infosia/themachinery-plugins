@@ -576,7 +576,9 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 					const uint32_t v_begin = v * 4;
 					for (int8_t idx = 0; idx < 4; ++idx) {
 						const uint16_t joints_data_idx = joints_data_char != NULL ? joints_data_char[v_begin+idx] : joints_data_short[v_begin+idx];
-						joints_used[joints_data_idx] = true;
+						if (joints_data_idx < skin->joints_count) {
+							joints_used[joints_data_idx] = true;
+						}
 					}
 				}
 
@@ -654,7 +656,11 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 					const uint32_t v_begin = v * 4;
 					for (uint8_t idx = 0; idx < 4; idx++) {
 						const uint16_t joints_data_idx = joints_data_char != NULL ? joints_data_char[v_begin + idx] : joints_data_short[v_begin + idx];
-						tm_carray_temp_push(skin_data[v], ((tm_bone_weight_t){.bone_idx = joints_index[joints_data_idx], .weight = weights_data[v_begin + idx] }), ta);
+						if (joints_data_idx < skin->joints_count) {
+							tm_carray_temp_push(skin_data[v], ((tm_bone_weight_t){.bone_idx = joints_index[joints_data_idx], .weight = weights_data[v_begin + idx] }), ta);
+						} else {
+							tm_carray_temp_push(skin_data[v], ((tm_bone_weight_t){.bone_idx = 0, .weight = 0.f }), ta);						
+						}
 					}
 				}
 
