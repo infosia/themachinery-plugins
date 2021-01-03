@@ -551,16 +551,16 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 
 				const cgltf_size unpack_count = acc_JOINTS_0->count * 4;
 
-				unsigned char*  joints_data_char = NULL;
-				unsigned short* joints_data_short = NULL;
+				uint8_t*  joints_data_char = NULL;
+				uint16_t* joints_data_short = NULL;
 				if (acc_JOINTS_0->component_type == cgltf_component_type_r_8u) {
                     tm_carray_temp_resize(joints_data_char, unpack_count, ta);
                     cgltf_buffer_view* buffer_view = acc_JOINTS_0->buffer_view;
-                    memcpy(joints_data_char, (uint8_t*)buffer_view->buffer->data + buffer_view->offset, buffer_view->size);
+                    memcpy(joints_data_char, (uint8_t*)buffer_view->buffer->data + buffer_view->offset, unpack_count * sizeof(uint8_t));
                 } else {
                     tm_carray_temp_resize(joints_data_short, unpack_count, ta);
                     cgltf_buffer_view* buffer_view = acc_JOINTS_0->buffer_view;
-                    memcpy(joints_data_short, (uint8_t*)buffer_view->buffer->data + buffer_view->offset, buffer_view->size);                                
+                    memcpy(joints_data_short, (uint8_t*)buffer_view->buffer->data + buffer_view->offset, unpack_count * sizeof(uint16_t));                                
 				}
 
 				cgltf_float *weights_data = NULL;
