@@ -558,17 +558,9 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 
 				const cgltf_size unpack_count = acc_JOINTS_0->count * 4;
 
-				uint8_t*  joints_data_char = NULL;
-				uint16_t* joints_data_short = NULL;
-				if (acc_JOINTS_0->component_type == cgltf_component_type_r_8u) {
-                    tm_carray_temp_resize(joints_data_char, unpack_count, ta);
-                    cgltf_buffer_view* buffer_view = acc_JOINTS_0->buffer_view;
-                    memcpy(joints_data_char, (uint8_t*)buffer_view->buffer->data + buffer_view->offset, unpack_count * sizeof(uint8_t));
-                } else {
-                    tm_carray_temp_resize(joints_data_short, unpack_count, ta);
-                    cgltf_buffer_view* buffer_view = acc_JOINTS_0->buffer_view;
-                    memcpy(joints_data_short, (uint8_t*)buffer_view->buffer->data + buffer_view->offset, unpack_count * sizeof(uint16_t));                                
-				}
+				cgltf_float *joints_data = NULL;
+				tm_carray_temp_resize(joints_data, unpack_count, ta);
+				cgltf_accessor_unpack_floats(acc_JOINTS_0, joints_data, unpack_count);
 
 				cgltf_float *weights_data = NULL;
 				tm_carray_temp_resize(weights_data, unpack_count, ta);
@@ -582,7 +574,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				for (uint32_t v = 0; v < num_vertices; ++v) {
 					const uint32_t v_begin = v * 4;
 					for (int8_t idx = 0; idx < 4; ++idx) {
-						const uint16_t joints_data_idx = joints_data_char != NULL ? joints_data_char[v_begin+idx] : joints_data_short[v_begin+idx];
+						const uint16_t joints_data_idx = (uint16_t)joints_data[v_begin+idx];
 						if (joints_data_idx < skin->joints_count) {
 							joints_used[joints_data_idx] = true;
 						}
@@ -662,7 +654,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				for (uint32_t v = 0; v < num_vertices; ++v) {
 					const uint32_t v_begin = v * 4;
 					for (uint8_t idx = 0; idx < 4; idx++) {
-						const uint16_t joints_data_idx = joints_data_char != NULL ? joints_data_char[v_begin + idx] : joints_data_short[v_begin + idx];
+						const uint16_t joints_data_idx = (uint16_t)joints_data[v_begin + idx];
 						if (joints_data_idx < skin->joints_count) {
 							tm_carray_temp_push(skin_data[v], ((tm_bone_weight_t){.bone_idx = joints_index[joints_data_idx], .weight = weights_data[v_begin + idx] }), ta);
 						} else {
