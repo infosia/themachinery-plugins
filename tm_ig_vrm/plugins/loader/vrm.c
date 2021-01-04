@@ -211,7 +211,14 @@ static void import_node(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 	const tm_tt_id_t id = tm_the_truth_api->create_object_of_type(tt, dcc_asset_ti->node_type, TM_TT_NO_UNDO_SCOPE);
 	tm_the_truth_object_o *tm_node = tm_the_truth_api->write(tt, id);
 
-	const char *node_name = node->name == NULL ? "node.*" : node->name;
+	char *node_name = node->name;
+
+	// node name should be unique
+	if (node_name == NULL)  {
+		TM_INIT_TEMP_ALLOCATOR(ta);
+		node_name = tm_temp_allocator_api->printf(ta, "nodes[%d]", id.index);
+		TM_SHUTDOWN_TEMP_ALLOCATOR(ta);
+	}
 
 	tm_the_truth_api->set_string(tt, tm_node, TM_TT_PROP__DCC_ASSET_NODE__NAME, node_name);
 	const uint64_t name_hash = tm_murmur_hash_string_inline(node_name);
