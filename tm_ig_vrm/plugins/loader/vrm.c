@@ -558,9 +558,11 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 
 				const cgltf_size unpack_count = acc_JOINTS_0->count * 4;
 
-				cgltf_float *joints_data = NULL;
+				cgltf_uint *joints_data = NULL;
 				tm_carray_temp_resize(joints_data, unpack_count, ta);
-				cgltf_accessor_unpack_floats(acc_JOINTS_0, joints_data, unpack_count);
+				for (cgltf_size k = 0; k < acc_JOINTS_0->count; ++k) {
+					cgltf_accessor_read_uint(acc_JOINTS_0, k, joints_data + (k * 4), 4);
+				}
 
 				cgltf_float *weights_data = NULL;
 				tm_carray_temp_resize(weights_data, unpack_count, ta);
