@@ -221,7 +221,7 @@ static void import_node(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 	}
 
 	tm_the_truth_api->set_string(tt, tm_node, TM_TT_PROP__DCC_ASSET_NODE__NAME, node_name);
-	const uint64_t name_hash = tm_murmur_hash_string_inline(node_name);
+	const uint64_t name_hash = tm_murmur_hash_string(node_name);
 	tm_hash_add(node_by_name, name_hash, id);
 
 	tm_vec3_t p = { 0, 0, 0 };
@@ -314,7 +314,7 @@ static tm_tt_id_t extract_texture(struct tm_the_truth_o *tt, name_to_id_t *image
 		image_name = tm_temp_allocator_api->printf(ta, "*.%d", texture->image_index);
 	}
 
-	uint64_t path_hash = tm_murmur_hash_string_inline(image_name);
+	uint64_t path_hash = tm_murmur_hash_string(image_name);
 	tm_tt_id_t *image = tm_hash_add_reference(image_lookup, path_hash);
 	if (!image->u64) {
 		tm_buffers_i *buffers = tm_the_truth_api->buffers(tt);
