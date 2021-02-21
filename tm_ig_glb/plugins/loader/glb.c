@@ -63,17 +63,6 @@ typedef struct smikktspace_data_t
 
 typedef struct TM_HASH_T(uint64_t, tm_tt_id_t) name_to_id_t;
 
-static cgltf_skin *glb_get_skin_for_mesh(const cgltf_data *data, const cgltf_mesh *mesh)
-{
-	for (cgltf_size i = 0; i < data->nodes_count; ++i) {
-		const cgltf_node *node = &data->nodes[i];
-		if (node->skin != NULL && node->mesh != NULL && node->mesh->name != NULL && strcmp(node->mesh->name, mesh->name) == 0) {
-			return node->skin;
-		}
-	}
-	return NULL;
-}
-
 static void glb_to_tm_vec4(const cgltf_float *in, tm_vec4_t *out)
 {
 	out->x = in[0];
@@ -431,9 +420,14 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 
 	// Meshes
 	size_t tt_total_mesh_count = 0;
-	for (cgltf_size i = 0; i < data->meshes_count; ++i) {
+	for (cgltf_size i = 0; i < data->nodes_count; ++i) {
 		tm_progress_report_api->set_task_progress(task_id, tm_temp_allocator_api->printf(ta, "%s - meshes: %i / %i", scene_name, i, data->meshes_count), (float)i / (float)data->meshes_count);
-		cgltf_mesh *mesh = &data->meshes[i];
+		cgltf_node *node = &data->nodes[i];
+
+		if (node->mesh == NULL)
+			continue;
+
+		cgltf_mesh *mesh = node->mesh;
 
 		// Used to keep reference to tm_mesh
 		mesh->ext_0 = tt_total_mesh_count;
@@ -517,7 +511,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 				num_vertices = (uint32_t)acc_POSITION->count;
 			}
 
-			cgltf_skin *skin = glb_get_skin_for_mesh(data, mesh);
+			cgltf_skin *skin = node->skin;
 
 			if (skin != NULL && acc_JOINTS_0 != NULL && acc_WEIGHTS_0 != NULL && num_vertices > 0) {
 				tm_carray_temp_resize(skin_data, num_vertices, ta);
