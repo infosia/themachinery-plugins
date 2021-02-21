@@ -336,6 +336,7 @@ typedef struct cgltf_accessor
 	cgltf_size extensions_count;
 	cgltf_extension* extensions;
 	cgltf_size buffer_view_index;
+	void* ext_0;
 } cgltf_accessor;
 
 typedef struct cgltf_attribute
@@ -554,6 +555,7 @@ typedef struct cgltf_mesh {
 	cgltf_extras extras;
 	cgltf_size extensions_count;
 	cgltf_extension* extensions;
+	cgltf_size ext_0;
 } cgltf_mesh;
 
 typedef struct cgltf_node cgltf_node;
