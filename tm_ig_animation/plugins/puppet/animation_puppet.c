@@ -101,7 +101,7 @@ static void component__create_types(struct tm_the_truth_o *tt)
         { "scale_factor",    TM_THE_TRUTH_PROPERTY_TYPE_SUBOBJECT, .type_hash = TM_TT_TYPE_HASH__SCALE },
     };
 
-    const uint64_t object_type = tm_the_truth_api->create_object_type(tt, TM_TT_TYPE__IG_ANIMATION_PUPPET, animation_puppet_component_properties, TM_ARRAY_COUNT(animation_puppet_component_properties));
+    const tm_tt_type_t object_type = tm_the_truth_api->create_object_type(tt, TM_TT_TYPE__IG_ANIMATION_PUPPET, animation_puppet_component_properties, TM_ARRAY_COUNT(animation_puppet_component_properties));
 
     const tm_tt_id_t component = tm_the_truth_api->create_object_of_type(tt, tm_the_truth_api->object_type_from_name_hash(tt, TM_TT_TYPE_HASH__IG_ANIMATION_PUPPET), TM_TT_NO_UNDO_SCOPE);
     tm_the_truth_object_o *component_w = tm_the_truth_api->write(tt, component);

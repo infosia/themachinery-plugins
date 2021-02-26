@@ -354,7 +354,7 @@ static bool import_into(struct tm_the_truth_o *tt, struct tm_the_truth_object_o 
 	const char *scene_name, const char *asset_path, struct tm_temp_allocator_i *ta, struct tm_error_i *error,
 	uint64_t task_id)
 {
-	const uint64_t dcc_asset_scene_type = tm_the_truth_api->object_type_from_name_hash(tt, TM_TT_TYPE_HASH__DCC_ASSET_SCENE);
+	const tm_tt_type_t dcc_asset_scene_type = tm_the_truth_api->object_type_from_name_hash(tt, TM_TT_TYPE_HASH__DCC_ASSET_SCENE);
 	const tm_tt_id_t scene_id = tm_the_truth_api->create_object_of_type(tt, dcc_asset_scene_type, TM_TT_NO_UNDO_SCOPE);
 	tm_the_truth_object_o *scene_obj = tm_the_truth_api->write(tt, scene_id);
 
@@ -990,7 +990,7 @@ static void import_vrm_task(void *task_data, uint64_t task_id)
 
 	tm_the_truth_o *tt = args->tt;
 
-	const uint64_t dcc_asset_type = tm_the_truth_api->object_type_from_name_hash(tt, TM_TT_TYPE_HASH__DCC_ASSET);
+	const tm_tt_type_t dcc_asset_type = tm_the_truth_api->object_type_from_name_hash(tt, TM_TT_TYPE_HASH__DCC_ASSET);
 	const tm_tt_id_t asset_id = tm_the_truth_api->create_object_of_type(tt, dcc_asset_type, TM_TT_NO_UNDO_SCOPE);
 	tm_the_truth_object_o *asset_obj = tm_the_truth_api->write(tt, asset_id);
 
@@ -1013,7 +1013,7 @@ static void import_vrm_task(void *task_data, uint64_t task_id)
 
 			tm_asset_browser_add_asset_api *add_asset = tm_global_api_registry->get(TM_ASSET_BROWSER_ADD_ASSET_API_NAME);
 			const bool should_select = args->asset_browser.u64 && tm_the_truth_api->version(tt, args->asset_browser) == args->asset_browser_version_at_start;
-			add_asset->add(add_asset->inst, args->target_dir, asset_id, asset_name, args->undo_scope, should_select, args->ui);
+			add_asset->add(add_asset->inst, args->target_dir, asset_id, asset_name, args->undo_scope, should_select, args->ui, NULL, 0);
 		}
 	}
 
@@ -1052,7 +1052,7 @@ static bool can_import(struct tm_asset_io_o *inst, const char *extension)
 static bool can_reimport(struct tm_asset_io_o *inst, struct tm_the_truth_o *tt, tm_tt_id_t asset)
 {
 	const tm_tt_id_t wav = tm_the_truth_api->get_subobject(tt, tm_tt_read(tt, asset), TM_TT_PROP__ASSET__OBJECT);
-	return wav.type == tm_the_truth_api->object_type_from_name_hash(tt, TM_TT_TYPE_HASH__DCC_ASSET);
+	return wav.type == tm_the_truth_api->object_type_from_name_hash(tt, TM_TT_TYPE_HASH__DCC_ASSET).u64;
 }
 
 static void importer_extensions_string(struct tm_asset_io_o *inst, char **output, struct tm_temp_allocator_i *ta, const char *separator)
