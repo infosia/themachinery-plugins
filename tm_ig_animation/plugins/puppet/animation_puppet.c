@@ -194,7 +194,7 @@ static void engine_update__bind(tm_engine_o *inst, tm_engine_update_set_t *data)
     }
 
     tm_entity_t root = tm_tag_component_api->find_first(tm_tag_component_manager, ANIMATION_ROOT_TAG_HASH);
-    tm_scene_tree_component_t *root_stc = tm_entity_api->get_component(ctx, root, tm_entity_api->lookup_component(ctx, TM_TT_TYPE_HASH__SCENE_TREE_COMPONENT));
+    tm_scene_tree_component_t *root_stc = tm_entity_api->get_component(ctx, root, tm_entity_api->lookup_component_type(ctx, TM_TT_TYPE_HASH__SCENE_TREE_COMPONENT));
 
     if (root.u64 == 0 || root_stc == NULL) {
         return;
@@ -205,7 +205,7 @@ static void engine_update__bind(tm_engine_o *inst, tm_engine_update_set_t *data)
 
         for (uint32_t i = 0; i < update_array->n; ++i) {
             tm_entity_t target_entity = update_array->entities[i];
-            tm_scene_tree_component_t *stc = tm_entity_api->get_component(ctx, target_entity, tm_entity_api->lookup_component(ctx, TM_TT_TYPE_HASH__SCENE_TREE_COMPONENT));
+            tm_scene_tree_component_t *stc = tm_entity_api->get_component(ctx, target_entity, tm_entity_api->lookup_component_type(ctx, TM_TT_TYPE_HASH__SCENE_TREE_COMPONENT));
 
             for (uint32_t bone_idx = 0; bone_idx < BONE_COUNT; bone_idx++) {
                 uint64_t root_node_name = BONES_1[bone_idx];
@@ -238,16 +238,16 @@ static void engine_update__bind(tm_engine_o *inst, tm_engine_update_set_t *data)
     }
 }
 
-static bool engine_filter__bind(tm_engine_o *inst, const uint32_t *components, uint32_t num_components, const tm_component_mask_t *mask)
+static bool engine_filter__bind(tm_engine_o *inst, const tm_component_type_t *components, uint32_t num_components, const tm_component_mask_t *mask)
 {
     return tm_entity_mask_has_component(mask, components[0]) && (tm_entity_mask_has_component(mask, components[1]) || tm_entity_mask_has_component(mask, components[2]));
 }
 
 static void component__register_engine(struct tm_entity_context_o *ctx)
 {
-    const uint32_t anim_component = tm_entity_api->lookup_component(ctx, TM_TT_TYPE_HASH__IG_ANIMATION_PUPPET);
-    const uint32_t scene_tree_component = tm_entity_api->lookup_component(ctx, TM_TT_TYPE_HASH__SCENE_TREE_COMPONENT);
-    const uint32_t tag_component = tm_entity_api->lookup_component(ctx, TM_TT_TYPE_HASH__TAG_COMPONENT);
+    const tm_component_type_t anim_component = tm_entity_api->lookup_component_type(ctx, TM_TT_TYPE_HASH__IG_ANIMATION_PUPPET);
+    const tm_component_type_t scene_tree_component = tm_entity_api->lookup_component_type(ctx, TM_TT_TYPE_HASH__SCENE_TREE_COMPONENT);
+    const tm_component_type_t tag_component = tm_entity_api->lookup_component_type(ctx, TM_TT_TYPE_HASH__TAG_COMPONENT);
 
     tm_tag_component_manager = (tm_tag_component_manager_o *)tm_entity_api->component_manager(ctx, tag_component);
 
